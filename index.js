@@ -12,7 +12,13 @@ var clientes = [
     {
         id: 2,
         nome: 'Ciclano'
-    }
+    },
+    {
+        id: 3,
+        nome: 'Éder',
+        sobrenome: 'Marques',
+        email: 'edermarques@fatecriopreto.edu.br'
+    },
 ];
 
 const server = express();
