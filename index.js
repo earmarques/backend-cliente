@@ -1,48 +1,70 @@
 
 // Adicionar a biblioteca express
 const express = require('express');
+const mongoose = require('mongoose');
+const Clientes = require('./ClienteSchema');
 
-// Base de Dados Volátil e Estática
-var clientes = [
-    {
-        id: 1,
-        nome: 'Fulano',
-        email: 'fulano@gmail.com'
-    },
-    {
-        id: 2,
-        nome: 'Ciclano'
-    },
-    {
-        id: 3,
-        nome: 'Éder',
-        sobrenome: 'Marques',
-        email: 'edermarques@fatecriopreto.edu.br'
-    },
-];
+const MONGO_URL = "mongodb+srv://usuario:senha@cluster0-djibm.mongodb.net/dbcliente?retryWrites=true&w=majority";
+
+// conectar com o banco de dados MongoDB
+mongoose.connect(MONGO_URL);
 
 const server = express();
 
-server.get('/cliente', function(request, response) {
+// Os dados serão recebidos no formato json:
+server.use(express.json());
+
+server.get('/cliente', async function(request, response) {
+    const clientes = await Clientes.find();   // SELECT * FROM Clientes
+
     return response.json(clientes);
 });
 
-server.get('/cliente/:id', function(request, response) {
+
+server.get('/cliente/:id', async function(request, response) {
 
     const id = request.params.id;
-
-    const cliente = clientes.filter(c => c.id == id);
+    //const cliente = clientes.filter(c => c.id == id);
+    const cliente = await Clientes.findById(id);
 
     return response.json(cliente);
 });
 
 
-server.delete('/cliente/:id', function(request, response) {
+server.delete('/cliente/:id', async function(request, response) {
     const id = request.params.id;
-    clientes = clientes.filter(c => c.id != id);
+    //clientes = clientes.filter(c => c.id != id);
     
     return response.status(200).send();
 });
+ 
+
+server.post('/cliente', async function(request, response) {
+    const cliente = request.body;
+    //return response.send(cliente.nome);
+    //clientes.push(cliente);
+
+    await Clientes.create(cliente); // INSERT INTO Cliente VALUES (...)
+
+    return response.status(201).send();
+})
+
+
+server.put('/cliente/:id', async function(request, response){
+    const id = request.params.id;
+    const cliente = request.body;
+
+    clientes.forEach(cli => {
+        if (cli.id == id) {
+            cli.nome = cliente.nome;
+            cli.email = cliente.email;
+
+            return;
+        }
+    });
+
+    return response.status(200).send();
+})
 
 server.listen(3000);
 
